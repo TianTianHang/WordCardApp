@@ -136,6 +136,7 @@ public class WordItem {
         Observer<Response> observer = new Observer<Response>() {
             @Override
             public void onSubscribe(@NotNull Disposable d) {
+
             }
 
             @Override
@@ -190,4 +191,20 @@ public class WordItem {
         BaseHttp.httpGet(baseUrl, params).subscribe(observer);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WordItem wordItem = (WordItem) o;
+
+        return getId() == wordItem.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId();
+        result = 31 * result + getWord().hashCode();
+        return result;
+    }
 }

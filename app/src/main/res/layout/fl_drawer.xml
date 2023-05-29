@@ -18,19 +18,12 @@
                 android:layout_height="wrap_content">
 
             <EditText
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
                     android:ems="10"
-                    android:id="@+id/search_word"/>
-
-            <ImageButton
-                    android:src="@android:drawable/ic_menu_search"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/bt_search"
-                    android:layout_weight="1"/>
+                    android:id="@+id/et_filter"
+                    />
 
         </LinearLayout>
 
@@ -38,7 +31,6 @@
                 android:id="@+id/words_listview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white"
                 />
 
     </LinearLayout>

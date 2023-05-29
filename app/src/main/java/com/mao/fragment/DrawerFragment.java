@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.DateKeyListener;
 import android.util.Log;
 import android.widget.*;
 import androidx.core.view.GravityCompat;
@@ -18,17 +20,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.mao.activity.R;
 import com.mao.adapter.WordAdapter;
+import com.mao.dao.WordItemDao;
 import com.mao.event.HttpEvent;
 import com.mao.model.WordItem;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
 public class DrawerFragment extends Fragment {
-    private ArrayList<WordItem> wordItems;
 
     public DrawerFragment() {
         // Required empty public constructor
@@ -50,18 +53,8 @@ public class DrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        WordItem wordItem1=new WordItem();
-        wordItem1.setWord("hello");
-        wordItem1.setHeat(100);
-        wordItem1.setCount(1);
-
-        WordItem wordItem2=new WordItem();
-        wordItem2.setWord("good");
-        wordItem2.setHeat(0);
-        wordItem2.setCount(10);
-        wordItems=new ArrayList<>();
-        wordItems.add(wordItem1);
-        wordItems.add(wordItem2);
+        WordItemDao wordItemDao=new WordItemDao(requireActivity());
+        List<WordItem> wordItems = wordItemDao.findAllWord();
         // 获取view
         View view=inflater.inflate(R.layout.fl_drawer, container, false);
         ListView listView = view.findViewById(R.id.words_listview);
@@ -71,14 +64,18 @@ public class DrawerFragment extends Fragment {
         // 设置适配器
         listView.setAdapter(adapter);
 
-        ImageButton btSearch=view.findViewById(R.id.bt_search);
-        btSearch.setOnClickListener(new View.OnClickListener() {
+        EditText filter=view.findViewById(R.id.et_filter);
+        filter.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                EditText search=view.findViewById(R.id.search_word);
-                Editable s= search.getText();
-                WordItem word=new WordItem(s.toString());
-                word.reloadWordInfo();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(filter.getText());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
             }
         });
 

@@ -7,18 +7,20 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
     private final String db_name ;
-    private final String db_structure;
+    private final Context mcontext;
+    private final String table_structure;
     private final int db_version;
-    public DBHelper(Context context, String  db_name, String dbStructure, int db_version) {
+    public DBHelper(Context context, String  db_name, String tableStructure, int db_version) {
         super(context, db_name, null, db_version);
         this.db_name=db_name;
-        this.db_structure = dbStructure;
+        this.mcontext=context;
+        this.table_structure = tableStructure;
         this.db_version=db_version;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS "+this.db_structure);
+        db.execSQL("CREATE TABLE IF NOT EXISTS "+this.table_structure);
     }
 
     @Override

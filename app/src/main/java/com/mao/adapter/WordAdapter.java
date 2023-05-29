@@ -6,50 +6,41 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.mao.activity.R;
+import com.mao.dao.WordItemDao;
 import com.mao.event.HttpEvent;
 import com.mao.fragment.WordCardFragment;
 import com.mao.model.WordItem;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class WordAdapter extends ArrayAdapter<WordItem> {
-    public WordAdapter(@NonNull Context context, int resource) {
-        super(context, resource);
-    }
-
-    public WordAdapter(@NonNull Context context, int resource, int textViewResourceId) {
-        super(context, resource, textViewResourceId);
-    }
-
-    public WordAdapter(@NonNull Context context, int resource, @NonNull WordItem[] objects) {
-        super(context, resource, objects);
-    }
-
-    public WordAdapter(@NonNull Context context, int resource, int textViewResourceId, @NonNull WordItem[] objects) {
-        super(context, resource, textViewResourceId, objects);
-    }
+public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
+    private final ArrayList<WordItem>  mOriginalValues;
+    private List<WordItem> mValues;
 
     public WordAdapter(@NonNull Context context, int resource, @NonNull List<WordItem> objects) {
         super(context, resource, objects);
-
+        mOriginalValues = new ArrayList<>(objects);
+        mValues= objects;
     }
 
-    public WordAdapter(@NonNull Context context, int resource, int textViewResourceId, @NonNull List<WordItem> objects) {
-        super(context, resource, textViewResourceId, objects);
-    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -64,7 +55,30 @@ public class WordAdapter extends ArrayAdapter<WordItem> {
                 word.reloadWordInfo();
             }
         });
+        view.setOnTouchListener(new View.OnTouchListener() {
+            private long downTime;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
 
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downTime = System.currentTimeMillis();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        long upTime = System.currentTimeMillis();
+                        if (upTime - downTime > 500) {
+                            // Long press detected
+                            // Handle long press event
+                            WordItemDao wordItemDao=new WordItemDao(getContext());
+                            String id =((TextView)v.findViewById(R.id.tv_word_id)).getText().toString();
+                            wordItemDao.deleteWord(Integer.parseInt(id));
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
 
         TextView wordText = view.findViewById(R.id.word_text);
         wordText.setText(word.getWord());
@@ -73,8 +87,38 @@ public class WordAdapter extends ArrayAdapter<WordItem> {
         TextView heatText = view.findViewById(R.id.heat_text);
         heatText.setBackgroundResource(getHeatBg(word.getHeat()));
         heatText.setText(String.valueOf(word.getHeat()));
-
+        TextView idText= view.findViewById(R.id.tv_word_id);
+        idText.setText(String.valueOf(word.getId()));
         return view;
+    }
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                if (constraint != null) {
+                    // 过滤数据源,得到过滤后的list
+                    ArrayList<WordItem> filterList = new ArrayList<>();
+                    for (WordItem item : mOriginalValues) {
+                        if (item.getWord().contains(constraint.toString())) {
+                            filterList.add(item);
+                        }
+                    }
+                    results.values = filterList;
+                    results.count = filterList.size();
+                }
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                // 更新adapter的数据源
+                mValues.clear();
+                mValues.addAll((ArrayList<WordItem>)results.values);
+                notifyDataSetChanged();
+            }
+        };
     }
 
 
