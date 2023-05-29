@@ -1,4 +1,4 @@
 package com.mao.event;
 
-public class HttpEvent extends BaseEvent{
+public class HttpEvent extends BaseEvent {
 }
