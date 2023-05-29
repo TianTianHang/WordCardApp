@@ -9,34 +9,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.mao.activity.R;
 
-
 import java.util.List;
 
 public class PosMeaningAdapter extends ArrayAdapter<String[]> {
 
-    public PosMeaningAdapter(@NonNull Context context, int resource) {
-        super(context, resource);
-    }
-
-    public PosMeaningAdapter(@NonNull Context context, int resource, int textViewResourceId) {
-        super(context, resource, textViewResourceId);
-    }
-
-    public PosMeaningAdapter(@NonNull Context context, int resource, @NonNull String[][] objects) {
-        super(context, resource, objects);
-    }
-
-    public PosMeaningAdapter(@NonNull Context context, int resource, int textViewResourceId, @NonNull String[][] objects) {
-        super(context, resource, textViewResourceId, objects);
-    }
 
     public PosMeaningAdapter(@NonNull Context context, int resource, @NonNull List<String[]> objects) {
         super(context, resource, objects);
     }
 
-    public PosMeaningAdapter(@NonNull Context context, int resource, int textViewResourceId, @NonNull List<String[]> objects) {
-        super(context, resource, textViewResourceId, objects);
-    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

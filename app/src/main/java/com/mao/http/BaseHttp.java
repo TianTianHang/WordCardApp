@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class BaseHttp {
-    public static Observable<Response> httpGet(String baseUrl,Map<String, String> params) {
+    public static Observable<Response> httpGet(String baseUrl, Map<String, String> params) {
         HttpUrl httpUrl = HttpUrl.parse(baseUrl);
         HttpUrl.Builder builder = null;
         if (httpUrl != null) {
@@ -20,7 +20,7 @@ public class BaseHttp {
         }
 
         String url;
-        if (builder!= null) {
+        if (builder != null) {
             url = builder.toString();
         } else {
             url = null;

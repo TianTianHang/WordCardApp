@@ -1,10 +1,6 @@
 package com.mao.adapter;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,31 +10,21 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import com.mao.activity.R;
 import com.mao.dao.WordItemDao;
-import com.mao.event.HttpEvent;
-import com.mao.fragment.WordCardFragment;
 import com.mao.model.WordItem;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
-    private final ArrayList<WordItem>  mOriginalValues;
+    private final ArrayList<WordItem> mOriginalValues;
     private List<WordItem> mValues;
 
     public WordAdapter(@NonNull Context context, int resource, @NonNull List<WordItem> objects) {
         super(context, resource, objects);
         mOriginalValues = new ArrayList<>(objects);
-        mValues= objects;
+        mValues = objects;
     }
 
 
@@ -53,10 +39,12 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
             @Override
             public void onClick(View v) {
                 word.reloadWordInfo();
+                word.setCount(word.getCount() + 1);
             }
         });
         view.setOnTouchListener(new View.OnTouchListener() {
             private long downTime;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -69,8 +57,8 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
                         if (upTime - downTime > 500) {
                             // Long press detected
                             // Handle long press event
-                            WordItemDao wordItemDao=new WordItemDao(getContext());
-                            String id =((TextView)v.findViewById(R.id.tv_word_id)).getText().toString();
+                            WordItemDao wordItemDao = new WordItemDao(getContext());
+                            String id = ((TextView) v.findViewById(R.id.tv_word_id)).getText().toString();
                             wordItemDao.deleteWord(Integer.parseInt(id));
                             return true;
                         }
@@ -84,13 +72,14 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
         wordText.setText(word.getWord());
 
 
-        TextView heatText = view.findViewById(R.id.heat_text);
-        heatText.setBackgroundResource(getHeatBg(word.getHeat()));
-        heatText.setText(String.valueOf(word.getHeat()));
-        TextView idText= view.findViewById(R.id.tv_word_id);
+        TextView countText = view.findViewById(R.id.count_text);
+        countText.setBackgroundResource(getHeatBg(word.getHeat()));
+        countText.setText(String.valueOf(word.getCount()));
+        TextView idText = view.findViewById(R.id.tv_word_id);
         idText.setText(String.valueOf(word.getId()));
         return view;
     }
+
     @Override
     public Filter getFilter() {
         return new Filter() {
@@ -115,7 +104,7 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 // 更新adapter的数据源
                 mValues.clear();
-                mValues.addAll((ArrayList<WordItem>)results.values);
+                mValues.addAll((ArrayList<WordItem>) results.values);
                 notifyDataSetChanged();
             }
         };

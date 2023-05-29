@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -13,13 +12,9 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import com.mao.adapter.WordAdapter;
 import com.mao.event.DBEvent;
 import com.mao.event.HttpEvent;
-import com.mao.fragment.DrawerFragment;
-import com.mao.fragment.MainFragment;
-import com.mao.fragment.SettingsFragment;
-import com.mao.fragment.WordCardFragment;
+import com.mao.fragment.*;
 import com.mao.model.WordItem;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,25 +39,29 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
         init();
     }
-    private void init(){
+
+    private void init() {
         initMain();
         initDrawer();
     }
-    private void initMain(){
+
+    private void initMain() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MainFragment mainFragment=new MainFragment();
-        fragmentTransaction.replace(R.id.main_container,mainFragment);
+        MainFragment mainFragment = new MainFragment();
+        fragmentTransaction.replace(R.id.main_container, mainFragment);
         fragmentTransaction.commit();
 
     }
-    private void initDrawer(){
+
+    private void initDrawer() {
         DrawerFragment drawerFragment = new DrawerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.drawer_container, drawerFragment);
         fragmentTransaction.commit();
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -82,22 +81,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(HttpEvent event) {
         String message = event.message;
         // 处理事件
         Log.d("d", message);
         if (event.what == 1) {
-            WordCardFragment wordCardFragment = new WordCardFragment((WordItem)event.obj);
+            WordCardFragment wordCardFragment = new WordCardFragment((WordItem) event.obj);
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.main_container, wordCardFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-            DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        } else if (event.what == 2) {
+            ErrorFragment errorFragment = new ErrorFragment((Throwable) event.obj);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.main_container, errorFragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         }
     }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(DBEvent event) {
         String type = event.type;
@@ -115,18 +125,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.all_menu,menu);
-        menu.setGroupVisible(R.id.group1,false);
+        getMenuInflater().inflate(R.menu.all_menu, menu);
+        menu.setGroupVisible(R.id.group1, false);
         return true;
     }
+
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.exit_menu_item:
                 finish();
                 return true;
             case R.id.setting_item:
-                SettingsFragment settingsFragment=new SettingsFragment();
-                FragmentManager fragmentManager=getSupportFragmentManager();
+                SettingsFragment settingsFragment = new SettingsFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.main_container, settingsFragment);
                 fragmentTransaction.addToBackStack(null);

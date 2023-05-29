@@ -1,20 +1,11 @@
 package com.mao.model;
 
-import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import com.mao.activity.R;
 import com.mao.event.HttpEvent;
 import com.mao.http.BaseHttp;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.BufferedSource;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -41,7 +32,7 @@ public class WordItem {
     public WordItem() {
     }
 
-    public WordItem(String word)  {
+    public WordItem(String word) {
         this.word = word;
     }
 
@@ -118,7 +109,7 @@ public class WordItem {
 
     public ArrayList<String[]> getPosAndMeaning() {
         ArrayList<String[]> result = new ArrayList<>();
-        if(pos!=null && meaning!=null) {
+        if (pos != null && meaning != null) {
             for (int i = 0; i < pos.size(); i++) {
                 result.add(new String[]{pos.get(i), meaning.get(i)});
             }
@@ -127,12 +118,11 @@ public class WordItem {
     }
 
 
-
     public void reloadWordInfo() {
         String baseUrl = "https://www.bing.com/dict/search";
         Map<String, String> params = new HashMap<>();
         params.put("q", word);
-        WordItem wordItem=this;
+        WordItem wordItem = this;
         Observer<Response> observer = new Observer<Response>() {
             @Override
             public void onSubscribe(@NotNull Disposable d) {
@@ -159,8 +149,8 @@ public class WordItem {
                             wordItem.meaning.add(e.text());
                         }
                         for (Element e : example) {
-                            String s=e.child(0).text()+'\n'+e.child(1).text()+'\n'+
-                                        e.child(2).text();
+                            String s = e.child(0).text() + '\n' + e.child(1).text() + '\n' +
+                                    e.child(2).text();
                             wordItem.example.add(s);
                         }
                     }
@@ -168,23 +158,24 @@ public class WordItem {
                     onError(e);
                 }
             }
+
             @Override
             public void onError(@NotNull Throwable e) {
-                Log.d("d","eventbus send error");
+                Log.d("d", "eventbus send error");
                 HttpEvent msg = new HttpEvent();
-                msg.what=1;
-                msg.obj = null;
-                msg.message="error";
+                msg.what = 2;
+                msg.obj = e;
+                msg.message = "error";
                 EventBus.getDefault().post(msg);
             }
 
             @Override
-            public void onComplete(){
-                Log.d("d","eventbus send success");
+            public void onComplete() {
+                Log.d("d", "eventbus send success");
                 HttpEvent msg = new HttpEvent();
-                msg.what=1;
+                msg.what = 1;
                 msg.obj = wordItem;
-                msg.message="success";
+                msg.message = "success";
                 EventBus.getDefault().post(msg);
             }
         };
