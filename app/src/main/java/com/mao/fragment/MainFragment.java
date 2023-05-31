@@ -31,13 +31,13 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         ImageButton btSearch = view.findViewById(R.id.ib_search);
+        EditText search = view.findViewById(R.id.et_search);
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText filter = view.findViewById(R.id.et_search);
-                Editable s = filter.getText();
+                Editable s = search.getText();
                 WordItem word = new WordItem(s.toString());
-                word.reloadWordInfo();
+                word.reloadWordInfo(requireContext());
             }
         });
         // Inflate the layout for this fragment

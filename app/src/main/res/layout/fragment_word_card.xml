@@ -24,6 +24,50 @@
                 android:layout_gravity="center"
                 />
 
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                >
+
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_pron1"
+                    android:layout_weight="1"/>
+
+            <ImageView
+                    android:src="@drawable/mr_cast_mute_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/iv_sound1"
+                    android:layout_weight="0.5"/>
+
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_pron2"
+                    android:layout_weight="1"/>
+
+            <ImageView
+                    android:src="@drawable/mr_cast_mute_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/iv_sound2"
+                    android:layout_weight="0.5"/>
+
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"/>
+        </LinearLayout>
+
         <ListView
                 android:id="@+id/lv_pos_meaning"
                 android:layout_width="match_parent"

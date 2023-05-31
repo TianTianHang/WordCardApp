@@ -14,6 +14,7 @@ import com.mao.adapter.ExampleAdapter;
 import com.mao.adapter.PosMeaningAdapter;
 import com.mao.dao.WordItemDao;
 import com.mao.model.WordItem;
+import com.mao.model.WordMP3;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -64,6 +65,10 @@ public class WordCardFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_word_card, container, false);
         TextView tv_word = view.findViewById(R.id.tv_word);
+        TextView tv_pron1 = view.findViewById(R.id.tv_pron1);
+        TextView tv_pron2 = view.findViewById(R.id.tv_pron2);
+        ImageView iv_sound1 = view.findViewById(R.id.iv_sound1);
+        ImageView iv_sound2 = view.findViewById(R.id.iv_sound2);
         ListView lv_example = view.findViewById(R.id.lv_example);
         ListView lv_pos_meaning = view.findViewById(R.id.lv_pos_meaning);
         ImageView iv_home = view.findViewById(R.id.iv_home);
@@ -72,6 +77,10 @@ public class WordCardFragment extends Fragment {
                 R.layout.pos_meaning_lvi, wordItem.getPosAndMeaning());
         ExampleAdapter exampleAdapter = new ExampleAdapter(requireActivity(), R.layout.example_lvi, wordItem.getExample());
         tv_word.setText(wordItem.getWord());
+        tv_pron1.setText(wordItem.getPron()[0]);
+        tv_pron2.setText(wordItem.getPron()[1]);
+        iv_sound1.setColorFilter(R.color.dayNight_black);
+        iv_sound2.setColorFilter(R.color.dayNight_black);
         lv_pos_meaning.setAdapter(posMeaningAdapter);
         lv_example.setAdapter(exampleAdapter);
         iv_home.setOnClickListener(new View.OnClickListener() {
@@ -84,11 +93,24 @@ public class WordCardFragment extends Fragment {
                 fragmentTransaction.commit();
             }
         });
+        WordMP3 wordMP3 = new WordMP3(requireContext());
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
                 fragmentManager.popBackStack();
+            }
+        });
+        iv_sound1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wordMP3.play(wordItem.getWord() + "-1.mp3");
+            }
+        });
+        iv_sound2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wordMP3.play(wordItem.getWord() + "-2.mp3");
             }
         });
         return view;

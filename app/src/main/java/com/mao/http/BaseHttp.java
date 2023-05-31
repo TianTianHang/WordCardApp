@@ -14,8 +14,10 @@ public class BaseHttp {
             builder = httpUrl.newBuilder();
         }
         if (builder != null) {
-            for (String key : params.keySet()) {
-                builder.addQueryParameter(key, params.get(key));
+            if (params != null) {
+                for (String key : params.keySet()) {
+                    builder.addQueryParameter(key, params.get(key));
+                }
             }
         }
 

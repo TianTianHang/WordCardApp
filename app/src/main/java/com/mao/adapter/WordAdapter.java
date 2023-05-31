@@ -12,7 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.mao.activity.R;
 import com.mao.dao.WordItemDao;
+import com.mao.event.HttpEvent;
 import com.mao.model.WordItem;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +40,18 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                word.reloadWordInfo();
-                word.setCount(word.getCount() + 1);
+                if (!word.getLoad()) {
+                    word.reloadWordInfo(getContext());
+
+                } else {
+                    HttpEvent msg = new HttpEvent();
+                    msg.what = 1;
+                    msg.obj = word;
+                    msg.message = "already load";
+                    EventBus.getDefault().post(msg);
+                    word.increaseCount();
+                }
+                new WordItemDao(getContext()).updateWord(word);
             }
         });
         view.setOnTouchListener(new View.OnTouchListener() {
@@ -73,7 +85,7 @@ public class WordAdapter extends ArrayAdapter<WordItem> implements Filterable {
 
 
         TextView countText = view.findViewById(R.id.count_text);
-        countText.setBackgroundResource(getHeatBg(word.getHeat()));
+        countText.setBackgroundResource(getHeatBg(word.getCount()));
         countText.setText(String.valueOf(word.getCount()));
         TextView idText = view.findViewById(R.id.tv_word_id);
         idText.setText(String.valueOf(word.getId()));

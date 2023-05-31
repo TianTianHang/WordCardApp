@@ -25,12 +25,20 @@ public class WordItemDao {
                 "  `pos` text NOT NULL,\n" +
                 "  `example` text NOT NULL,\n" +
                 "  `count` int NOT NULL,\n" +
-                "  `heat` int NOT NULL)", 1);
+                "  `pron` text NOT NULL)", 1);
     }
 
     public static String listToString(List<?> list, char sep) {
         StringBuilder result = new StringBuilder();
         for (Object o : list) {
+            result.append(o).append(sep);
+        }
+        return result.toString();
+    }
+
+    public static String listToString(String[] list, char sep) {
+        StringBuilder result = new StringBuilder();
+        for (String o : list) {
             result.append(o).append(sep);
         }
         return result.toString();
@@ -45,7 +53,7 @@ public class WordItemDao {
         String sql = "INSERT INTO word_item VALUES(null,?,?,?,?,?,?)";
         Object[] params = {item.getWord(), listToString(item.getMeaning(), '|'), listToString(item.getPos(), '|'),
                 listToString(item.getExample(), '|'), item.getCount(),
-                item.getHeat()};
+                listToString(item.getPron(), '|')};
         dbHelper.execSQL(sql, params);
         DBEvent event = new DBEvent();
         event.type = "insert";
@@ -55,10 +63,10 @@ public class WordItemDao {
 
     // 更新单词
     public void updateWord(WordItem item) {
-        String sql = "UPDATE word_item SET meaning = ?, pos = ?, example = ?, count = ?, heat = ?  WHERE id = ?";
+        String sql = "UPDATE word_item SET meaning = ?, pos = ?, example = ?, count = ?, pron = ?  WHERE id = ?";
         Object[] params = {listToString(item.getMeaning(), '|'), listToString(item.getPos(), '|'),
                 listToString(item.getExample(), '|'),
-                item.getCount(), item.getHeat(), item.getId()};
+                item.getCount(), listToString(item.getPron(), '|'), item.getId()};
         dbHelper.execSQL(sql, params);
         DBEvent event = new DBEvent();
         event.type = "update";
@@ -85,8 +93,11 @@ public class WordItemDao {
         @SuppressLint("Range") String example = cursor.getString(cursor.getColumnIndex("example"));
         ArrayList<String> examples = new ArrayList<>(Arrays.asList(example.split("\\|")));
         @SuppressLint("Range") int count = cursor.getInt(cursor.getColumnIndex("count"));
-        @SuppressLint("Range") int heat = cursor.getInt(cursor.getColumnIndex("heat"));
-        return new WordItem(id, word, meanings, poss, examples, count, heat);
+        @SuppressLint("Range") String pron = cursor.getString(cursor.getColumnIndex("pron"));
+        String[] prons = pron.split("\\|");
+        WordItem wordItem = new WordItem(id, word, meanings, poss, examples, count, prons);
+        wordItem.setLoad(true);
+        return wordItem;
     }
 
     // 查询单词

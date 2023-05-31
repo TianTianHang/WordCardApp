@@ -1,5 +1,6 @@
 package com.mao.model;
 
+import android.content.Context;
 import android.util.Log;
 import com.mao.event.HttpEvent;
 import com.mao.http.BaseHttp;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WordItem {
 
@@ -26,8 +29,9 @@ public class WordItem {
     private ArrayList<String> meaning;  // 词义
     private ArrayList<String> pos; //词性
     private ArrayList<String> example; //例句
+    private String[] pron;
     private int count;      // 出现次数
-    private int heat;     //热度
+    private Boolean isLoad = false;
 
     public WordItem() {
     }
@@ -36,15 +40,33 @@ public class WordItem {
         this.word = word;
     }
 
-    public WordItem(int id, String word, ArrayList<String> meaning, ArrayList<String> pos, ArrayList<String> example, int count, int heat) {
+    public WordItem(int id, String word, ArrayList<String> meaning, ArrayList<String> pos, ArrayList<String> example, int count, String[] pron) {
         this.id = id;
         this.word = word;
         this.meaning = meaning;
         this.pos = pos;
         this.example = example;
         this.count = count;
-        this.heat = heat;
+        this.pron = pron;
     }
+
+    public Boolean getLoad() {
+
+        return isLoad;
+    }
+
+    public void setLoad(Boolean load) {
+        isLoad = load;
+    }
+
+    public String[] getPron() {
+        return pron;
+    }
+
+    public void setPron(String[] pron) {
+        this.pron = pron;
+    }
+
 
     public int getId() {
         return id;
@@ -75,13 +97,6 @@ public class WordItem {
         this.count++;
     }
 
-    public int getHeat() {
-        return heat;
-    }
-
-    public void setHeat(int heat) {
-        this.heat = heat;
-    }
 
     public ArrayList<String> getMeaning() {
         return meaning;
@@ -118,7 +133,7 @@ public class WordItem {
     }
 
 
-    public void reloadWordInfo() {
+    public void reloadWordInfo(Context context) {
         String baseUrl = "https://www.bing.com/dict/search";
         Map<String, String> params = new HashMap<>();
         params.put("q", word);
@@ -139,6 +154,7 @@ public class WordItem {
                         Elements pos = doc.select("span.pos");
                         Elements meaning = doc.select(".def.b_regtxt");
                         Elements example = doc.select(".se_li1");
+                        Elements pron = doc.select(".hd_p1_1").get(0).getAllElements().select("div");
                         wordItem.pos = new ArrayList<>();
                         wordItem.meaning = new ArrayList<>();
                         wordItem.example = new ArrayList<>();
@@ -152,6 +168,16 @@ public class WordItem {
                             String s = e.child(0).text() + '\n' + e.child(1).text() + '\n' +
                                     e.child(2).text();
                             wordItem.example.add(s);
+                        }
+                        wordItem.pron = new String[]{pron.get(1).text(), pron.get(3).text()};
+                        Elements audioElements = pron.select("a");
+                        Pattern pattern = Pattern.compile("https(.*)\\.mp3");
+                        WordMP3 wordMP3 = new WordMP3(context);
+                        for (int i = 0; i < 2; i++) {
+                            Matcher matcher = pattern.matcher(audioElements.get(i).attributes().get("onclick"));
+                            matcher.find();
+                            String url = matcher.group();
+                            wordMP3.download(url, word + "-" + (i + 1) + ".mp3");
                         }
                     }
                 } catch (IOException e) {
@@ -177,6 +203,7 @@ public class WordItem {
                 msg.obj = wordItem;
                 msg.message = "success";
                 EventBus.getDefault().post(msg);
+                isLoad = true;
             }
         };
         BaseHttp.httpGet(baseUrl, params).subscribe(observer);

@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerOpened(View drawerView) {
-
+                initDrawer();
             }
 
             @Override
@@ -115,8 +115,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("d", type);
         switch (type) {
             case "insert":
-                initDrawer();
-                break;
             case "delete":
                 initDrawer();
                 break;
