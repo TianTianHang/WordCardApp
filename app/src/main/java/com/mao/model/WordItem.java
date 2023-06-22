@@ -30,6 +30,7 @@ public class WordItem {
     private ArrayList<String> pos; //词性
     private ArrayList<String> example; //例句
     private String[] pron;
+    private String[] urls;
     private int count;      // 出现次数
     private Boolean isLoad = false;
 
@@ -40,7 +41,8 @@ public class WordItem {
         this.word = word;
     }
 
-    public WordItem(int id, String word, ArrayList<String> meaning, ArrayList<String> pos, ArrayList<String> example, int count, String[] pron) {
+    public WordItem(int id, String word, ArrayList<String> meaning, ArrayList<String> pos, ArrayList<String> example,
+                    int count, String[] pron,  String[] url) {
         this.id = id;
         this.word = word;
         this.meaning = meaning;
@@ -48,6 +50,7 @@ public class WordItem {
         this.example = example;
         this.count = count;
         this.pron = pron;
+        this.urls = url;
     }
 
     public Boolean getLoad() {
@@ -132,6 +135,13 @@ public class WordItem {
         return result;
     }
 
+    public String[] getUrls() {
+        return urls;
+    }
+
+    public void setUrls(String[] urls) {
+        this.urls = urls;
+    }
 
     public void reloadWordInfo(Context context) {
         String baseUrl = "https://www.bing.com/dict/search";
@@ -170,17 +180,21 @@ public class WordItem {
                             wordItem.example.add(s);
                         }
                         wordItem.pron = new String[]{pron.get(1).text(), pron.get(3).text()};
+                        wordItem.urls=new String[2];
                         Elements audioElements = pron.select("a");
                         Pattern pattern = Pattern.compile("https(.*)\\.mp3");
                         WordMP3 wordMP3 = new WordMP3(context);
                         for (int i = 0; i < 2; i++) {
                             Matcher matcher = pattern.matcher(audioElements.get(i).attributes().get("onclick"));
-                            matcher.find();
-                            String url = matcher.group();
-                            wordMP3.download(url, word + "-" + (i + 1) + ".mp3");
+                            if(matcher.find()) {
+                                String url = matcher.group();
+                                wordItem.urls[i] = url;
+                                wordMP3.download(url, word + "-" + (i + 1) + ".mp3");
+                            }
                         }
                     }
-                } catch (IOException e) {
+                    onComplete();
+                } catch (Exception e) {
                     onError(e);
                 }
             }

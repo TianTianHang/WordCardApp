@@ -25,7 +25,8 @@ public class WordItemDao {
                 "  `pos` text NOT NULL,\n" +
                 "  `example` text NOT NULL,\n" +
                 "  `count` int NOT NULL,\n" +
-                "  `pron` text NOT NULL)", 1);
+                "  `pron` text NOT NULL,\n" +
+                "   `url` text NOT NULL)", 1);
     }
 
     public static String listToString(List<?> list, char sep) {
@@ -50,10 +51,10 @@ public class WordItemDao {
 
     // 创建单词
     public void createWord(WordItem item) {
-        String sql = "INSERT INTO word_item VALUES(null,?,?,?,?,?,?)";
+        String sql = "INSERT INTO word_item VALUES(null,?,?,?,?,?,?,?)";
         Object[] params = {item.getWord(), listToString(item.getMeaning(), '|'), listToString(item.getPos(), '|'),
                 listToString(item.getExample(), '|'), item.getCount(),
-                listToString(item.getPron(), '|')};
+                listToString(item.getPron(), '|'),listToString(item.getUrls(), '|')};
         dbHelper.execSQL(sql, params);
         DBEvent event = new DBEvent();
         event.type = "insert";
@@ -63,10 +64,10 @@ public class WordItemDao {
 
     // 更新单词
     public void updateWord(WordItem item) {
-        String sql = "UPDATE word_item SET meaning = ?, pos = ?, example = ?, count = ?, pron = ?  WHERE id = ?";
+        String sql = "UPDATE word_item SET meaning = ?, pos = ?, example = ?, count = ?, pron = ? ,url = ? WHERE id = ?";
         Object[] params = {listToString(item.getMeaning(), '|'), listToString(item.getPos(), '|'),
                 listToString(item.getExample(), '|'),
-                item.getCount(), listToString(item.getPron(), '|'), item.getId()};
+                item.getCount(), listToString(item.getPron(), '|'),listToString(item.getUrls(), '|'), item.getId()};
         dbHelper.execSQL(sql, params);
         DBEvent event = new DBEvent();
         event.type = "update";
@@ -95,7 +96,9 @@ public class WordItemDao {
         @SuppressLint("Range") int count = cursor.getInt(cursor.getColumnIndex("count"));
         @SuppressLint("Range") String pron = cursor.getString(cursor.getColumnIndex("pron"));
         String[] prons = pron.split("\\|");
-        WordItem wordItem = new WordItem(id, word, meanings, poss, examples, count, prons);
+        @SuppressLint("Range") String url = cursor.getString(cursor.getColumnIndex("url"));
+        String[] urls = url.split("\\|");
+        WordItem wordItem = new WordItem(id, word, meanings, poss, examples, count, prons, urls);
         wordItem.setLoad(true);
         return wordItem;
     }
@@ -106,7 +109,7 @@ public class WordItemDao {
         Cursor cursor = dbHelper.query(sql, new String[]{word});
         WordItem wordItem = null;
         DBEvent event = new DBEvent();
-        event.type = " query one";
+        event.type = "query one";
         if (cursor.moveToNext()) {
             wordItem = getWordItem(cursor);
         }
@@ -131,4 +134,7 @@ public class WordItemDao {
 
     }
 
+    public DBHelper getDbHelper() {
+        return dbHelper;
+    }
 }

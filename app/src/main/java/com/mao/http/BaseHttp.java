@@ -44,7 +44,6 @@ public class BaseHttp {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     emitter.onNext(response);
-                    emitter.onComplete();
                 }
             });
         });

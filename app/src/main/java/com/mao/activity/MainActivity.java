@@ -5,11 +5,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.mao.event.DBEvent;
@@ -22,7 +24,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private Fragment currentFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,23 +44,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         initMain();
-        initDrawer();
     }
 
     private void initMain() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MainFragment mainFragment = new MainFragment();
-        fragmentTransaction.replace(R.id.main_container, mainFragment);
-        fragmentTransaction.commit();
-
+        if(fragmentManager.findFragmentByTag("main")==null) {
+            fragmentTransaction.add(R.id.main_container, mainFragment,"main");
+            fragmentTransaction.commit();
+            currentFragment=mainFragment;
+        }
     }
 
-    private void initDrawer() {
-        DrawerFragment drawerFragment = new DrawerFragment();
+    private void openDrawer() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.drawer_container, drawerFragment);
+        if(fragmentManager.findFragmentByTag("drawer")==null) {
+            DrawerFragment drawerFragment = new DrawerFragment();
+            fragmentTransaction.add(R.id.drawer_container, drawerFragment,"drawer");
+        }else {
+            DrawerFragment drawerFragment= (DrawerFragment) fragmentManager.findFragmentByTag("drawer");
+            if (drawerFragment != null) {
+                fragmentTransaction.attach(drawerFragment);
+            }
+        }
+        fragmentTransaction.commit();
+    }
+    private void closeDrawer() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        DrawerFragment drawerFragment= (DrawerFragment) fragmentManager.findFragmentByTag("drawer");
+        if (drawerFragment != null) {
+            fragmentTransaction.detach(drawerFragment);
+        }
         fragmentTransaction.commit();
     }
 
@@ -72,16 +91,15 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerOpened(View drawerView) {
-                initDrawer();
+                openDrawer();
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
+                closeDrawer();
             }
         });
     }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(HttpEvent event) {
         String message = event.message;
@@ -91,16 +109,28 @@ public class MainActivity extends AppCompatActivity {
             WordCardFragment wordCardFragment = new WordCardFragment((WordItem) event.obj);
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.main_container, wordCardFragment);
+            fragmentTransaction.replace(R.id.main_container, wordCardFragment,"word_card");
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
+            currentFragment=wordCardFragment;
         } else if (event.what == 2) {
             ErrorFragment errorFragment = new ErrorFragment((Throwable) event.obj);
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.main_container, errorFragment);
+            fragmentTransaction.replace(R.id.main_container, errorFragment,"error");
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
+            currentFragment=errorFragment;
+        } else if (event.what==3) {
+            Toast.makeText(this,event.message,Toast.LENGTH_SHORT).show();
+        }else if(event.what==4){
+            MainFragment mainFragment = new MainFragment();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.main_container,mainFragment,"main");
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+            currentFragment=mainFragment;
         }
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -115,8 +145,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d("d", type);
         switch (type) {
             case "insert":
+                break;
             case "delete":
-                initDrawer();
+                closeDrawer();
+                openDrawer();
                 break;
         }
     }
@@ -137,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 SettingsFragment settingsFragment = new SettingsFragment();
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.main_container, settingsFragment);
+                fragmentTransaction.replace(R.id.main_container, settingsFragment,"setting");
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             default:

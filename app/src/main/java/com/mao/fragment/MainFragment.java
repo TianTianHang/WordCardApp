@@ -9,7 +9,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import androidx.fragment.app.Fragment;
 import com.mao.activity.R;
+import com.mao.dao.WordItemDao;
+import com.mao.event.HttpEvent;
 import com.mao.model.WordItem;
+import org.greenrobot.eventbus.EventBus;
 
 
 public class MainFragment extends Fragment {
@@ -36,8 +39,18 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Editable s = search.getText();
-                WordItem word = new WordItem(s.toString());
-                word.reloadWordInfo(requireContext());
+                WordItemDao wordItemDao=new WordItemDao(requireContext());
+                WordItem wordItem=wordItemDao.queryWord(s.toString());
+                if(wordItem!=null){
+                    HttpEvent msg = new HttpEvent();
+                    msg.what = 1;
+                    msg.obj = wordItem;
+                    msg.message = "already load";
+                    EventBus.getDefault().post(msg);
+                }else {
+                    WordItem word = new WordItem(s.toString());
+                    word.reloadWordInfo(requireContext());
+                }
             }
         });
         // Inflate the layout for this fragment

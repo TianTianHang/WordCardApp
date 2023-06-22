@@ -28,6 +28,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
     }
+    public void dropDatabase(){
+        mcontext.deleteDatabase(db_name);
+    }
 
     public void execSQL(String sql, Object[] params) {
         SQLiteDatabase db = getWritableDatabase();

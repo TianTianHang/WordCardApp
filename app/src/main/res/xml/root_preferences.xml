@@ -1,6 +1,7 @@
 <PreferenceScreen
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        >
+        app:icon="@drawable/ic_settings">
 
 
     <PreferenceCategory
@@ -12,5 +13,24 @@
                 android:key="switch theme"/>
 
     </PreferenceCategory>
+    <PreferenceCategory
+            android:title="数据">
 
+        <EditTextPreference
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                android:title="清空收藏的单词"
+                android:key="edp_drop_word"
+                android:dialogTitle="确定？"
+                android:dialogLayout="@xml/dialog_edittext_preference"
+                />
+        <EditTextPreference
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                android:title="删除已下载的音频"
+                android:key="edp_drop_word_pron"
+                android:dialogTitle="确定？"
+                android:dialogLayout="@xml/dialog_edittext_preference"
+                />
+    </PreferenceCategory>
 </PreferenceScreen>

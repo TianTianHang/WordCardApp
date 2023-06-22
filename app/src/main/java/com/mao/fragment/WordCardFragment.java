@@ -13,14 +13,24 @@ import com.mao.activity.R;
 import com.mao.adapter.ExampleAdapter;
 import com.mao.adapter.PosMeaningAdapter;
 import com.mao.dao.WordItemDao;
+import com.mao.event.HttpEvent;
 import com.mao.model.WordItem;
 import com.mao.model.WordMP3;
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 
 public class WordCardFragment extends Fragment {
 
     private WordItem wordItem;
+
+    public WordItem getWordItem() {
+        return wordItem;
+    }
+
+    public void setWordItem(WordItem wordItem) {
+        this.wordItem = wordItem;
+    }
 
     public WordCardFragment() {
         // Required empty public constructor
@@ -86,11 +96,10 @@ public class WordCardFragment extends Fragment {
         iv_home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                Fragment newFragment = new MainFragment();
-                fragmentTransaction.replace(R.id.main_container, newFragment);
-                fragmentTransaction.commit();
+                HttpEvent event=new HttpEvent();
+                event.what=4;
+                event.message="home";
+                EventBus.getDefault().post(event);
             }
         });
         WordMP3 wordMP3 = new WordMP3(requireContext());
@@ -104,13 +113,13 @@ public class WordCardFragment extends Fragment {
         iv_sound1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                wordMP3.play(wordItem.getWord() + "-1.mp3");
+                wordMP3.play(wordItem.getWord() + "-1.mp3",wordItem.getUrls()[0]);
             }
         });
         iv_sound2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                wordMP3.play(wordItem.getWord() + "-2.mp3");
+                wordMP3.play(wordItem.getWord() + "-2.mp3",wordItem.getUrls()[1]);
             }
         });
         return view;
